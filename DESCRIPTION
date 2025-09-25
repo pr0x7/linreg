@@ -1,18 +1,19 @@
 Package: linreg
 Type: Package
-Title: What the Package Does (Title Case)
+Title: R package for linear regression models 
 Version: 0.1.0
-Authors@R: c(
-    person(
-      "Jane", "Doe",
-      email = "jane@example.com",
-      role = c("aut", "cre")
+Authors@R: 
+    c(
+        person("Proksh", "Proksh", email = "propr391@student.liu.se", role = c("aut", "cre")),
+        person("Hewa", "Ali Ahmed", email = "hewah066@student.liu.se", role = "aut")
     )
-  )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
-License: What license is it under?
+Description: employed S3 object + QR decomposition
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/pr0x7/linreg
-BugReports: https://github.com/pr0x7/linreg/issues
+RoxygenNote: 7.3.3
+Depends: 
+    R (>= 3.5)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
