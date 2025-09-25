@@ -1,1 +1,8 @@
 exportPattern("^[[:alpha:]]+")
+importFrom(ggplot2,ggplot)
+importFrom(ggplot2,aes)
+importFrom(ggplot2,geom_point)
+importFrom(utils,head)
+importFrom(utils,tail)
+importFrom("stats", "fitted", "model.frame", "model.matrix",
+               "model.response", "pt", "resid", "terms")
