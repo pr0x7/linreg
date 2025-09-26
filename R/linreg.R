@@ -53,6 +53,8 @@
 #'
 #' @seealso \code{\link[stats]{lm}} for the base R implementation of linear regression.
 #' @export
+#' @importFrom stats model.response pt terms
+
 
 linreg <- function(formula, data) {
   mf <- model.frame(formula, data)
@@ -69,7 +71,7 @@ linreg <- function(formula, data) {
   df <- n - p
   sigma2 <- sum(resid^2) / df
 
-  # compute vcov via R from QR
+
   R <- qr.R(qrX)
   Rinv <- backsolve(R, diag(p))                 # R^{-1}
   XtX_inv <- Rinv %*% t(Rinv)                    # (X'X)^{-1}

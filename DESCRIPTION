@@ -7,7 +7,7 @@ Authors@R:
         person("Proksh", "Proksh", email = "propr391@student.liu.se", role = c("aut", "cre")),
         person("Hewa", "Ali Ahmed", email = "hewah066@student.liu.se", role = "aut")
     )
-Description: employed S3 object + QR decomposition
+Description: employed S3 object + QR decomposition.R package for linear regression models. with plots ...
 License: MIT + file LICENSE
 Imports: 
     stats,

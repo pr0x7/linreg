@@ -1,10 +1,10 @@
-#============================================================================
-  # S3 METHODS - ALL FIXED
-  # ============================================================================
+utils::globalVariables(c("sres", "fitted", "resid"))
+
 
 #' Print method for linreg objects
 #' @param x An object of class "linreg"
 #' @param ... Additional arguments (not used)
+#' @export print.linreg
 #' @export
 print.linreg <- function(x, ...) {
   cat("\nCall:\n")
@@ -54,19 +54,13 @@ coef.linreg <- function(object, ...) {
   return(coeffs)
 }
 
-#' Extract residuals from linreg objects
-#' @param object An object of class "linreg"
-#' @param ... Additional arguments (not used)
-#' @return Vector of residuals
-#' @export
-resid.linreg <- function(object, ...) {
-  return(object$residuals)
-}
+
 
 #' Extract residuals from linreg objects (alternative name)
 #' @param object An object of class "linreg"
 #' @param ... Additional arguments (not used)
 #' @return Vector of residuals
+#' @export residuals.linreg
 #' @export
 residuals.linreg <- function(object, ...) {
   return(object$residuals)
@@ -119,87 +113,51 @@ pred.linreg <- function(object, newdata = NULL, ...) {
   return(predict.linreg(object, newdata, ...))
 }
 
-#' Generic for plot
-#' @param x An object of class "linreg"
-#' @param ... Additional arguments (not used)
-#' @export
-plot <- function(x, ...) {
-  UseMethod("plot")
-}
 
 #' Plot method for linreg objects
 #' @param x An object of class "linreg"
 #' @param ... Additional arguments (not used)
-#' @import ggplot2
-#' @importFrom ggplot2 ggplot aes geom_point geom_hline geom_smooth labs theme_bw geom_text .data
+#' @export plot.linreg
 #' @export
+#' @import ggplot2
+#' @method plot linreg
 plot.linreg <- function(x, ...) {
+  stopifnot(inherits(x, "linreg"))
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-   stop("ggplot2 is needed for plot method. Please install it.", call. = FALSE)
+    stop("Package 'ggplot2' must be installed to plot linreg objects.")
   }
 
-  fitted_vals <- x$fitted
-  residuals_vals <- x$residuals
-  standardized_residuals <- residuals_vals / sqrt(x$sigma2)
-  sqrt_abs_std_resid <- sqrt(abs(standardized_residuals))
+  # Use the correct component names from your linreg object
+  fitted <- x$fitted  # NOT x$fitted.values
+  resid  <- x$residuals
+  sigma  <- sqrt(x$sigma2)
+  std_resid <- resid / sigma
 
-  plot_data <- data.frame(
-    fitted = fitted_vals,
-    residuals = residuals_vals,
-    std_residuals = standardized_residuals,
-    sqrt_abs_std_resid = sqrt_abs_std_resid,
-    obs_num = seq_along(residuals_vals)
-  )
+  df1 <- data.frame(fitted = fitted, resid = resid)
+  df2 <- data.frame(fitted = fitted, sres = sqrt(abs(std_resid)))
 
-  outliers <- which(abs(standardized_residuals) > 2)
-
-  # Plot 1: Residuals vs Fitted
-  p1 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$fitted, y = .data$residuals)) +
+  p1 <- ggplot2::ggplot(df1, ggplot2::aes(fitted, resid)) +
     ggplot2::geom_point() +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-    ggplot2::geom_smooth(se = FALSE, color = "red", method = "loess", formula = y ~ x) +
+    ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+    ggplot2::geom_smooth(method = "loess", se = FALSE, formula = y ~ x) +  # Added method
     ggplot2::labs(
       title = "Residuals vs Fitted",
-      subtitle = deparse(x$call),
-      x = "Fitted values",
+      x = "Fitted values",  # Simplified label
       y = "Residuals"
     ) +
-    ggplot2::theme_bw()
+    ggplot2::theme_minimal()
 
-  if (length(outliers) > 0) {
-    p1 <- p1 + ggplot2::geom_text(
-      data = plot_data[outliers, ],
-      ggplot2::aes(label = .data$obs_num, x = .data$fitted, y = .data$residuals),
-      hjust = -0.2, vjust = -0.2
-    )
-  }
-
-  # Plot 2: Scale-Location
-  p2 <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$fitted, y = .data$sqrt_abs_std_resid)) +
+  p2 <- ggplot2::ggplot(df2, ggplot2::aes(fitted, sres)) +
     ggplot2::geom_point() +
-    ggplot2::geom_smooth(se = FALSE, color = "red", method = "loess", formula = y ~ x) +
+    ggplot2::geom_smooth(method = "loess", se = FALSE, formula = y ~ x) +  # Added method
     ggplot2::labs(
       title = "Scale-Location",
-      subtitle = deparse(x$call),
-      x = "Fitted values",
+      x = "Fitted values",  # Simplified label
       y = expression(sqrt("|Standardized residuals|"))
     ) +
-    ggplot2::theme_bw()
-
-  if (length(outliers) > 0) {
-    p2 <- p2 + ggplot2::geom_text(
-      data = plot_data[outliers, ],
-      ggplot2::aes(label = .data$obs_num, x = .data$fitted, y = .data$sqrt_abs_std_resid),
-      hjust = -0.2, vjust = -0.2
-    )
-  }
+    ggplot2::theme_minimal()
 
   print(p1)
   print(p2)
+  invisible(list(plot1 = p1, plot2 = p2))  # Better to return the plots
 }
-
-
-methods(plot)
-
-
-
