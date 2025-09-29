@@ -1,0 +1,77 @@
+---
+title: "linreg: Linear Regression with Iris Dataset"
+author: "Proksh Proksh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{linreg: Linear Regression with Iris Dataset}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Linear Regression Analysis of Iris Data
+
+This vignette demonstrates the use of the `linreg` package for linear regression
+analysis using the famous Iris dataset. We'll explore various regression models
+to understand the relationships between iris flower measurements.
+
+# Introduction to the Iris Dataset
+
+The Iris dataset contains measurements for 150 iris flowers from three species:
+- **Setosa**
+- **Versicolor**
+- **Virginica**
+
+For each flower, four measurements are recorded:
+- Sepal.Length
+- Sepal.Width
+- Petal.Length
+- Petal.Width
+
+```{r load_data, message=FALSE}
+# Load the linreg package and iris data
+library(linreg)
+data(iris)
+
+# Display basic information about the dataset
+cat("Iris Dataset Structure:\n")
+str(iris)
+
+cat("\nFirst few observations:\n")
+head(iris)
+
+cat("\nSpecies distribution:\n")
+table(iris$Species)
+
+
+
+# Scatterplot matrix
+pairs(iris[,1:4], col = iris$Species, pch = 16, 
+      main = "Scatterplot Matrix of Iris Measurements")
+
+# Add legend
+legend("topright", legend = levels(iris$Species), 
+       col = 1:3, pch = 16, cex = 0.8)
+
+
+# Simple linear regression
+model1 <- linreg(Sepal.Length ~ Sepal.Width, data = iris)
+
+cat("Model 1: Sepal.Length ~ Sepal.Width\n")
+print(model1)
+summary(model1)
+
+
+# Multiple linear regression
+model2 <- linreg(Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width, 
+                 data = iris)
+
+cat("Model 2: Sepal.Length ~ Sepal.Width + Petal.Length + Petal.Width\n")
+summary(model2)
+
+
+
+# Generate diagnostic plots for Model 3
+plot(model2)
+
+
