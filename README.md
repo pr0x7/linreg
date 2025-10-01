@@ -5,23 +5,7 @@
 [![R-CMD-check](https://github.com/pr0x7/linreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pr0x7/linreg/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-The goal of linreg is to ...
+linreg is a R package that implements linear and Ridge regression using QR decomposition.
 
-## Installation
 
-You can install the development version of linreg from [GitHub](https://github.com/) with:
-
-``` r
-# install.packages("pak")
-pak::pak("pr0x7/linreg")
-```
-
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(linreg)
-## basic example code
-```
 
