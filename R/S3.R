@@ -1,5 +1,8 @@
 utils::globalVariables(c("sres", "fitted", "resid"))
 
+#' Print method for linreg objects
+#' @param x An object
+#' @param ... Additional arguments
 #' @export
 print <- function(x, ...) {
   UseMethod("print")
@@ -233,15 +236,5 @@ summary.ridgereg <- function(object, ...) {
 
 
 
-library(MASS)
-data(mtcars)
-
-model <- ridgereg(mpg ~ wt + hp, data = mtcars, lambda = 1)
-print(model)
-coef(model)
-fitted(model)
-residuals(model)
-predict(model, head(mtcars))
-summary(model)
 
 
