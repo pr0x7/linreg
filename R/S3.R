@@ -1,6 +1,9 @@
 utils::globalVariables(c("sres", "fitted", "resid"))
 
-
+#' @export
+print <- function(x, ...) {
+  UseMethod("print")
+}
 #' Print method for linreg objects
 #' @param x An object of class "linreg"
 #' @param ... Additional arguments (not used)
@@ -161,3 +164,74 @@ plot.linreg <- function(x, ...) {
   print(p2)
   invisible(list(plot1 = p1, plot2 = p2))  # Better to return the plots
 }
+
+
+
+
+#' @export
+print.ridgereg <- function(x, ...) {
+  cat("Ridge Regression Model (QR Decomposition)\n")
+  cat("Formula:", deparse(x$formula), "\n")
+  cat("Lambda:", x$lambda, "\n\n")
+  cat("Coefficients:\n")
+  print(round(x$coefficients, 4))
+  invisible(x)
+}
+
+#' Coefficients for ridgereg objects
+#' @param object A ridgereg object
+#' @param ... Additional arguments
+#' @export
+coef.ridgereg <- function(object, ...) object$coefficients
+
+#' Fitted values for ridgereg objects
+#' @param object A ridgereg object
+#' @param ... Additional arguments
+#' @export
+fitted.ridgereg <- function(object, ...) object$fitted.values
+
+#' Residuals for ridgereg objects
+#' @param object A ridgereg object
+#' @param ... Additional arguments
+#' @export
+residuals.ridgereg <- function(object, ...) object$residuals
+
+#' Predict method for ridgereg objects
+#' @param object A ridgereg object
+#' @param newdata New data frame for prediction
+#' @param ... Additional arguments
+#' @export
+predict.ridgereg <- function(object, newdata = NULL, ...) {
+  if (is.null(newdata)) return(object$fitted.values)
+
+  X_new <- model.matrix(object$formula, newdata)
+  # Standardize newdata like training set
+  X_train <- model.matrix(object$formula, object$data)
+  mu <- colMeans(X_train[, -1, drop = FALSE])
+  sd <- apply(X_train[, -1, drop = FALSE], 2, sd)
+  X_new[, -1] <- sweep(X_new[, -1, drop = FALSE], 2, mu, "-")
+  X_new[, -1] <- sweep(X_new[, -1, drop = FALSE], 2, sd, "/")
+
+  as.vector(X_new %*% object$coefficients)
+}
+
+#' Summary method for ridgereg objects
+#' @param object A ridgereg object
+#' @param ... Additional arguments
+#' @export
+summary.ridgereg <- function(object, ...) {
+  cat("Ridge Regression Summary\n")
+  cat("Formula:", deparse(object$formula), "\n")
+  cat("Lambda:", object$lambda, "\n\n")
+  cat("Coefficients:\n")
+  print(round(object$coefficients, 4))
+  cat("\nResidual standard error:",
+      sqrt(sum(object$residuals^2)/(length(object$residuals)-length(object$coefficients))), "\n")
+  cat("Number of observations:", length(object$residuals), "\n")
+  invisible(object)
+}
+
+
+
+
+
