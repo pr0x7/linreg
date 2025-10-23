@@ -17,10 +17,13 @@ ridgereg(formula, data, lambda = 0)
 An object of class "ridgereg".
 }
 \description{
-Performs ridge regression using QR decomposition.
+Performs ridge regression using QR decomposition with centering and scaling
+to match the behavior of MASS::lm.ridge().
 }
 \details{
-Ridge regression solves (X'X + λI)β = X'y using QR decomposition for stability.
+Ridge regression solves (X'X + λI)β = X'y using QR decomposition for numerical stability.
+Predictors are standardized and the intercept is adjusted back to the
+original scale to make results comparable with MASS::lm.ridge().
 }
 \examples{
 model <- ridgereg(mpg ~ wt + hp, data = mtcars, lambda = 1)

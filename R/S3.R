@@ -207,15 +207,20 @@ residuals.ridgereg <- function(object, ...) object$residuals
 predict.ridgereg <- function(object, newdata = NULL, ...) {
   if (is.null(newdata)) return(object$fitted.values)
 
-  X_new <- model.matrix(object$formula, newdata)
-  # Standardize newdata like training set
-  X_train <- model.matrix(object$formula, object$data)
-  mu <- colMeans(X_train[, -1, drop = FALSE])
-  sd <- apply(X_train[, -1, drop = FALSE], 2, sd)
-  X_new[, -1] <- sweep(X_new[, -1, drop = FALSE], 2, mu, "-")
-  X_new[, -1] <- sweep(X_new[, -1, drop = FALSE], 2, sd, "/")
+  if (is.matrix(newdata)) {
+    newdata <- as.data.frame(newdata)
+  }
 
-  as.vector(X_new %*% object$coefficients)
+  # Get coefficient names (excluding intercept)
+  coef_names <- names(object$coefficients)[-1]
+
+  # Create design matrix manually
+  X_new <- as.matrix(cbind(Intercept = 1, newdata[, coef_names, drop = FALSE]))
+
+  y_pred <- as.vector(X_new %*% object$coefficients)
+  names(y_pred) <- NULL
+
+  return(y_pred)
 }
 
 #' Summary method for ridgereg objects

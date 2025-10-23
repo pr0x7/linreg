@@ -1,0 +1,161 @@
+---
+title: "ridgereg: Ridge Regression Predictive Modeling"
+author: "Proksh Proksh"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ridgereg: Ridge Regression Predictive Modeling}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Ridge Regression Predictive Modeling
+
+This vignette demonstrates the use of ridge regression for predictive modeling using the BostonHousing dataset from the mlbench package.
+
+# Introduction to Ridge Regression
+
+Ridge regression is a regularization technique that adds a penalty term to the ordinary least squares objective function. It's particularly useful when dealing with multicollinearity or when the number of predictors is large relative to the number of observations.
+
+# The BostonHousing Dataset
+```{r load_data}
+library(linreg)
+library(caret)
+library(mlbench)
+library(glmnet)
+
+data("BostonHousing")
+
+cat("BostonHousing Dataset Structure:\n")
+str(BostonHousing)
+
+cat("\nSummary Statistics:\n")
+summary(BostonHousing)
+```
+
+# Step 1: Divide Data into Training and Test Sets
+```{r split_data}
+set.seed(123)
+
+trainIndex <- createDataPartition(BostonHousing$medv, p = 0.75, list = FALSE)
+train_data <- BostonHousing[trainIndex, ]
+test_data <- BostonHousing[-trainIndex, ]
+
+cat("Training set size:", nrow(train_data), "\n")
+cat("Test set size:", nrow(test_data), "\n")
+```
+
+# Step 2: Fit Linear Regression Models
+
+## Linear Regression Model
+```{r lm_model}
+ctrl <- trainControl(method = "none")
+lm_model <- train(medv ~ ., data = train_data, method = "lm", trControl = ctrl)
+
+print(lm_model)
+```
+
+## Forward Selection Model
+```{r forward_model}
+ctrl_forward <- trainControl(method = "cv", number = 10)
+
+forward_model <- train(medv ~ ., 
+                       data = train_data, 
+                       method = "leapForward", 
+                       tuneGrid = data.frame(nvmax = 1:13), 
+                       trControl = ctrl_forward)
+
+print(forward_model)
+plot(forward_model)
+```
+
+# Step 3: Evaluate Performance on Training Dataset
+```{r train_performance}
+lm_pred <- predict(lm_model, train_data)
+lm_rmse_train <- sqrt(mean((train_data$medv - lm_pred)^2))
+
+forward_pred <- predict(forward_model, train_data)
+forward_rmse_train <- sqrt(mean((train_data$medv - forward_pred)^2))
+
+cat("Linear Regression Training RMSE:", lm_rmse_train, "\n")
+cat("Forward Selection Training RMSE:", forward_rmse_train, "\n")
+```
+
+# Step 4: Create Custom Ridge Regression Model for Caret
+```{r ridge_custom}
+ridge_model <- list(
+  type = "Regression",
+  library = "linreg",
+  loop = NULL,
+  prob = NULL,
+  
+  parameters = data.frame(
+    parameter = "lambda",
+    class = "numeric",
+    label = "Lambda"
+  ),
+  
+  grid = function(x, y, len = NULL, search = "grid") {
+    data.frame(lambda = seq(0, 10, length.out = len))
+  },
+  
+  fit = function(x, y, wts, param, lev, last, weights, classProbs) {
+    dat <- as.data.frame(x)
+    dat$y <- y
+    ridgereg(y ~ ., data = dat, lambda = param$lambda)
+  },
+  
+  predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
+    predict(modelFit, newdata)
+  }
+)
+```
+
+# Step 5: Find Best Lambda Using 10-Fold Cross-Validation
+```{r ridge_cv}
+ctrl_ridge <- trainControl(method = "cv", number = 10)
+
+ridge_fit <- train(medv ~ ., 
+                   data = train_data, 
+                   method = ridge_model, 
+                   tuneGrid = data.frame(lambda = seq(0, 10, length.out = 20)),
+                   trControl = ctrl_ridge)
+
+print(ridge_fit)
+plot(ridge_fit)
+
+cat("\nBest lambda value:", ridge_fit$bestTune$lambda, "\n")
+```
+
+# Step 6: Evaluate Performance on Test Dataset
+```{r test_performance}
+lm_test_pred <- predict(lm_model, test_data)
+lm_test_rmse <- sqrt(mean((test_data$medv - lm_test_pred)^2))
+
+forward_test_pred <- predict(forward_model, test_data)
+forward_test_rmse <- sqrt(mean((test_data$medv - forward_test_pred)^2))
+
+ridge_test_pred <- predict(ridge_fit, test_data)
+ridge_test_rmse <- sqrt(mean((test_data$medv - ridge_test_pred)^2))
+
+results <- data.frame(
+  Model = c("Linear Regression", "Forward Selection", "Ridge Regression"),
+  Training_RMSE = c(lm_rmse_train, forward_rmse_train, NA),
+  Test_RMSE = c(lm_test_rmse, forward_test_rmse, ridge_test_rmse)
+)
+
+print(results)
+```
+
+# Conclusions
+
+The results show the comparative performance of three different regression approaches:
+
+1. **Linear Regression**: Standard OLS regression using all predictors
+2. **Forward Selection**: Automated feature selection to find optimal subset of predictors
+3. **Ridge Regression**: Regularized regression with penalty parameter lambda
+
+Ridge regression with the optimal lambda value provides a good balance between model complexity and predictive accuracy, particularly useful when dealing with multicollinearity in the predictor variables.
