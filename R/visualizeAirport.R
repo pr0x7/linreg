@@ -1,3 +1,7 @@
+#' Visualize Airport Delays
+#' @importFrom dplyr group_by summarise inner_join filter
+#' @importFrom magrittr %>%
+#' @export
 visualize_airport_delays <- function() {
   flights_data <- nycflights13::flights
   airports_data <- nycflights13::airports

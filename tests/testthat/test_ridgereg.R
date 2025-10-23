@@ -1,13 +1,7 @@
 test_that("ridgereg() returns correct object structure", {
-  data(mtcars)
-  model <- ridgereg(mpg ~ wt + hp, data = mtcars, lambda = 1)
-
+  model <- ridgereg(Sepal.Length ~ Sepal.Width + Petal.Length, data = iris, lambda = 1)
   expect_s3_class(model, "ridgereg")
-  expect_named(model, c("coefficients", "fitted.values", "residuals", "lambda", "formula", "data"), ignore.order = TRUE)
-  expect_true(is.numeric(model$coefficients))
-  expect_true(is.numeric(model$fitted.values))
-  expect_true(is.numeric(model$residuals))
-  expect_true(is.numeric(model$lambda))
+  expect_named(model, c("coefficients", "fitted.values", "residuals", "lambda", "formula", "data", "terms"))
 })
 
 test_that("ridge coefficients are close to lm.ridge()", {

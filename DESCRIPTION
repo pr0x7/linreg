@@ -9,20 +9,23 @@ Authors@R:
     )
 Description: employed S3 object + QR decomposition.R package for linear regression models. with plots ...
 License: MIT + file LICENSE
-Imports: 
-    stats,
-    ggplot2
+Imports:
+    dplyr,
+    magrittr,
+    ggplot2,
+    nycflights13
+Suggests:
+    MASS,
+    testthat,
+    knitr,
+    rmarkdown,
+    caret,
+    mlbench,
+    leaps
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
 Depends: 
     R (>= 3.5)
-Suggests: 
-    knitr,
-    rmarkdown,
-    testthat (>= 3.0.0),
-    caret,
-    mlbench,
-    leaps
 Config/testthat/edition: 3
 VignetteBuilder: knitr
