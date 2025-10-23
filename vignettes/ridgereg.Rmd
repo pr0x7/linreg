@@ -25,7 +25,6 @@ Ridge regression is a regularization technique that adds a penalty term to the o
 library(linreg)
 library(caret)
 library(mlbench)
-library(glmnet)
 
 data("BostonHousing")
 
